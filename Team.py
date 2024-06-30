@@ -1,4 +1,4 @@
-def Team():
+class Team():
     def __init__(self, id, code, name, group):
         self.id = id
         self.code = code

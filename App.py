@@ -23,6 +23,17 @@ class App():
         self.Lista_Team = []
         self.Lista_Ticket = []
 
+    def menu(self, opciones):
+        for i, opcion in enumerate(opciones):
+            print(f"{i+1}. {opcion}")
+        
+        opcion = input("ingrese el numero de la opcion que desea elegir: ")
+        while not opcion.isnumeric() or not int(opcion) in range(1, len(opciones)+1):
+            opcion = input("Error, ingrese el numero de la opcion que desea elegir: ")
+
+        opcion = int(opcion)-1
+
+        return opcion
 
     def run(self):
         self.API()
@@ -31,7 +42,7 @@ class App():
         print("Bienvenido")
         
         while True:
-            opcion = menu(opciones)
+            opcion = self.menu(opciones)
 
             if opcion == 0:
                 self.modulo_1()
@@ -100,24 +111,25 @@ class App():
         api_matches = requests.get("https://raw.githubusercontent.com/Algoritmos-y-Programacion/api-proyecto/main/matches.json").json()
 
         for match in api_matches:
-            new = Match(match["id"], match["number"], match["home"], match["away"], match["date"], match["group"], match["stadium_id"])
-
+            
             for team in self.Lista_Team:
-                if new.home["id"] == team.id:
-                    new.home = team
-                if new.away["id"] == team.id:
-                    new.away = team
+                if match["home"]["id"] == team.id:
+                    local = team
+                if match["away"]["id"] == team.id:
+                    away = team
 
             for stadium in self.Lista_Stadium:
                 if stadium.id == match["stadium_id"]:
-                    new.stadium = stadium
+                    stadium_match = stadium
+
+            new = Match(match["id"], match["number"], local, away, match["date"], match["group"], stadium_match)
 
             self.Lista_Match.append(new)
 
     #Gestión de partidos y estadios
     def modulo_1(self):
         opciones = ["Buscar todos los partidos de un país", "Buscar todos los partidos que se jugarán en un estadio específico", "Buscar todos los partidos que se jugarán en una fecha determinada"]
-        opcion = menu(opciones)
+        opcion = self.menu(opciones)
 
         if opcion == 0:
             self.search_match_country()
@@ -130,7 +142,7 @@ class App():
         match_search =input("Ingresa el pais por el que desea buscar el partido: ").lower()
         find = False
         for match in self.Lista_Match:
-            if match_search in match.name.lower():
+            if match_search in match.home.name.lower() or match_search in match.away.name.lower():
                 find = True
                 print(match.show())
         
@@ -165,25 +177,26 @@ class App():
         cedula = input("Ingresa tu cedula (sin puntos): ")
         data_client = self.validate_dni(cedula)
         if data_client == False:
-            name = input("Ingresa tu numero")
-            age = input("Ingresa tu edad")
+            name = input("Ingresa tu nombre: ")
+            age = input("Ingresa tu edad: ")
 
             data_client = Client(name, age, cedula)
             self.Lista_Client.append(data_client)
         
         for index, match in enumerate(self.Lista_Match):
-            print(f"----------{index+1}----------")
+            print(f"        ----------{index+1}----------")
+            print(match.show())
         
         match_number = input("Ingrese el numero del partido que desea escoger: ")
-        while not match_number.isnumer() or not int(match_number) in range(1, len(self.Lista_Match)+1):
+        while not match_number.isnumeric() or not int(match_number) in range(1, len(self.Lista_Match)+1):
             match_number = input("Ingrese el numero del partido que desea escoger: ")
         
         type_ticket = input("Ingrese el numero del tipo de entrada que desea: \n1. General \n2. VIP \n")
-        while not type_ticket.isnumer() or not int(type_ticket) in range(1, 3):
+        while not type_ticket.isnumeric() or not int(type_ticket) in range(1, 3):
             type_ticket = input("Ingrese el numero del tipo de entrada que desea: \n1. General \n2. VIP \n")
 
         match = self.Lista_Match[int(match_number)-1]
-        match_capacity = match.capacity
+        match_capacity = match.stadium.capacity
         precio = 0 
         if type_ticket == "1":
             match_capacity = match_capacity[0]
@@ -198,18 +211,35 @@ class App():
         for i in range(1, row+1):
             row_seating = []
             for j in range(1, 11):
-                seat = f"{i}{j}"
+                if len(str(i)) == 1:
+                    i = "0"+str(i)
+                seat = f"{i}-{j}"
                 row_seating.append(seat)
             seating.append(row_seating)
+        
+        for seat in seating:
+            seat = " | ".join(seat)
+            print(seat)
 
-        "||".join(seating)
+        print("formato del codigo fila-columna")
+        seat_row = input("Ingresa la fila del asiento: ")
+        while not seat_row.isnumeric() or not int(seat_row) in range(1, row+1):
+            seat_row = input("Ingresa la fila del asiento: ")
+
+        print("formato del codigo fila-columna")
+        seat_column = input("Ingresa la columna del asiento: ")
+        while not seat_column.isnumeric() or not int(seat_column) in range(1, 11):
+            seat_column = input("Ingresa la columna del asiento: ")
+        
+        
+
 
         
 
     
     def validate_dni(self, cedula):
-        for client in self.Client:
-            if int(client.cedula) == int(cedula):
+        for client in self.Lista_Client:
+            if int(client.dni) == int(cedula):
                 return client
         
         return False
@@ -221,7 +251,7 @@ class App():
     #Gestión de restaurantes
     def modulo_4(self):
         opciones = ["Buscar producto por nombre", "Buscar producto por tipo", "Buscar producto por rango"]
-        opcion = menu(opciones)
+        opcion = self.menu(opciones)
 
         if opcion == 0:
             self.search_product_name()

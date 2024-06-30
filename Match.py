@@ -7,14 +7,16 @@ class Match():
         self.date = date
         self.group = group
         self.stadium = stadium
+        self.tickets_vip = []
+        self.tickets_general = []
 
     def show(self):
         return f"""
             id: {self.id}
             number: {self.number}
-            home: {self.home}
-            away: {self.away}
+            home: {self.home.name}
+            away: {self.away.name}
             date: {self.date}
             group: {self.group}
-            stadium: {self.stadium}"""
+            stadium: {self.stadium.name}"""
         
