@@ -71,13 +71,16 @@ class App():
 
     #Carga del apis Teams en los objetos
     def API_Teams(self):
+        #Accede al api y descarga la informacion con el requests y la transforma en un json con el .json()
         api_teams = requests.get("https://raw.githubusercontent.com/Algoritmos-y-Programacion/api-proyecto/main/teams.json").json()
         
+        #agarra cada diccionario del apis y la convierte en objeto por medio del constructor
         for team in api_teams:
             new= Team(team["id"], team["code"], team["name"], team["group"])
             self.Lista_Team.append(new)
     #Carga del apis Stadiums en los objetos
     def API_Stadiums(self):
+        #Accede al api y descarga la informacion con el requests y la transforma en un json con el .json()
         api_stadiums = requests.get("https://raw.githubusercontent.com/Algoritmos-y-Programacion/api-proyecto/main/stadiums.json").json()
 
         #Recorrer Lista de estadios y guardar su informacion
@@ -111,20 +114,23 @@ class App():
             self.Lista_Stadium.append(new_stadium )
     #Carga del apis Stadiums en los objetos
     def API_Matches(self):
+        #Accede al api y descarga la informacion con el requests y la transforma en un json con el .json()
         api_matches = requests.get("https://raw.githubusercontent.com/Algoritmos-y-Programacion/api-proyecto/main/matches.json").json()
 
         for match in api_matches:
-            
+            #sustituimos los diccionarios de equipo que ya existen como objetos para tener todo a base de objeto 
             for team in self.Lista_Team:
                 if match["home"]["id"] == team.id:
                     local = team
                 if match["away"]["id"] == team.id:
                     away = team
 
+            #Busca un stadium que comparti id y lo intercambia en la variable
             for stadium in self.Lista_Stadium:
                 if stadium.id == match["stadium_id"]:
                     stadium_match = stadium
-
+            
+            #agarra cada diccionario del apis y la convierte en objeto por medio del constructor
             new = Match(match["id"], match["number"], local, away, match["date"], match["group"], stadium_match)
 
             self.Lista_Match.append(new)
@@ -140,8 +146,9 @@ class App():
             self.search_match_stadiums()
         elif opcion == 2:
             self.search_match_date()
-
+    #Busqueda de los partidos por el nombre de los paises que juegan
     def search_match_country(self):
+        #Con el dato ingresado recorre la lista y compara en elm atriburo home y away
         match_search =input("Ingresa el pais por el que desea buscar el partido: ").lower()
         find = False
         for match in self.Lista_Match:
@@ -151,8 +158,9 @@ class App():
         
         if not find:
             print("No se encontraron resultados")
-            
+    #Busqueda de los partidos por el estadio donde se juega      
     def search_match_stadiums(self):
+        #Con el dato ingresado recorre la lista y compara en el atributo stadium
         match_search =input("Ingresa el stadium por el que desea buscar el partido: ").lower()
         find = False
         for match in self.Lista_Match:
@@ -162,8 +170,9 @@ class App():
         
         if not find:
             print("No se encontraron resultados")
-            
+    #Busqueda de los partidos por la fecha
     def search_match_date(self):
+        #Con el dato ingresado recorre la lista y compara en el atributo date
         match_search =input("Ingresa la fecha por el que desea buscar el partido (Ej: 2024-06-14): ").lower()
         find = False
         for match in self.Lista_Match:
@@ -177,11 +186,13 @@ class App():
 
     #Gestión de venta de entradas
     def modulo_2(self):
+        #Pide la cedula al cliente y la verifica
         cedula = input("Ingresa tu cedula (sin puntos): ")
         while not cedula.replace(".", "").isnumeric() or 7 > len(cedula.replace(".", "")) > 8:
             cedula = input("Error, Ingresa la cedula: ")
         cedula = int(cedula.replace(".", ""))
-
+        
+        #Verifica si el cliente ya existe, de ser asi, busca su informacvion de no ser asi le pide los datos por primera vez
         data_client = self.validate_dni(cedula)
         if data_client == False:
             name = input("Ingresa tu nombre: ")
@@ -196,6 +207,7 @@ class App():
             data_client = Client(name, age, cedula)
             self.Lista_Client.append(data_client)
         
+        #Muestra todos los juegos para que el usuario escoja uno
         for index, match in enumerate(self.Lista_Match):
             print(f"        ----------{index+1}----------")
             print(match.show())
@@ -204,10 +216,12 @@ class App():
         while not match_number.isnumeric() or not int(match_number) in range(1, len(self.Lista_Match)+1):
             match_number = input("Ingrese el numero del partido que desea escoger: ")
         
+        #Ingerso del tipo de ticket
         type_ticket = input("Ingrese el numero del tipo de entrada que desea: \n1. General \n2. VIP \n")
         while not type_ticket.isnumeric() or not int(type_ticket) in range(1, 3):
             type_ticket = input("Ingrese el numero del tipo de entrada que desea: \n1. General \n2. VIP \n")
 
+        #Consigue el partido, junto a el se busca la capacidad del estadio para usar luego
         match = self.Lista_Match[int(match_number)-1]
         match_capacity = match.stadium.capacity
         price = 0 
@@ -218,8 +232,10 @@ class App():
             match_capacity = match_capacity[1]
             price = 75
         
+        #Cantidad de filas segun su capacidad
         row = match_capacity//10
-
+        
+        #Mapa del estadio, es una matriz
         seating = []
         for i in range(1, row+1):
             row_seating = []
@@ -234,12 +250,13 @@ class App():
             seat = " | ".join(seat)
             print(seat)
 
+
         if type_ticket == "1":
             ticket_bought = match.tickets_general
         else:
             ticket_bought = match.tickets_vip
 
-        
+        #Pide los datos del puesto del ticket
         print("formato del codigo fila-columna")
         seat_row = input("Ingresa la fila del asiento: ")
         while not seat_row.isnumeric() or not int(seat_row) in range(1, row+1):
@@ -252,6 +269,7 @@ class App():
         
         seat = f"{seat_column}-{seat_column}"
 
+        #Verifica la disponibilidad
         while seat in ticket_bought:
             print("Ticket ocupado ingrese otro")
 
@@ -267,7 +285,7 @@ class App():
             
             seat = f"{seat_column}-{seat_column}"
 
-        
+        #Claculos de la factura
         subtotal = price
         descuento = 0
         if self.vampiro(cedula):
@@ -275,7 +293,7 @@ class App():
         IVA = subtotal*0.16
         total = subtotal - descuento + IVA
         
-
+        #factura
         print("-------Resumen-------")
         print("---------------------------")
         print(f"-Asiento: {seat}")
@@ -284,22 +302,25 @@ class App():
         print(f"-IVA: {IVA}")
         print(f"-total: {total}")
 
+
         shopping = input("Desea comprar la entrada? \n1. si\n2. no \n>")
         while not shopping.isnumeric() or not int(shopping) in range(1,3):
             shopping = input("Desea comprar la entrada? \n1. si\n2. no \n>")
         
+        #guarda la informacion en las clases pertinentes para ser usadas mas adeolante
         if shopping == "1":
             id_unico = uuid.uuid4()
             print(f"Gracias por su compra, este el codig de tu entrada: {id_unico}")
             data_client.balance += total
             data_client.type_ticket = type_ticket
-            #match.ticket_bought.append(seat)
+            match.ticket_bought.append(seat)
             new_ticket = Ticket(id_unico, cedula, type_ticket, seat, match)
             self.Lista_Ticket.append(new_ticket)
 
         else:
             print("Hasta luego")
     
+    #Verifica si un numero es vampiro o no
     def vampiro(self, numero):
         digitos = list(str(numero))
         num_digitos = len(digitos)
@@ -317,6 +338,7 @@ class App():
 
         return False
 
+    #Te valida si la cedula existe para algun cliente anterior
     def validate_dni(self, cedula):
         for client in self.Lista_Client:
             if int(client.dni) == int(cedula):
@@ -326,12 +348,13 @@ class App():
 
     #Gestión de asistencia a partidos
     def modulo_3(self):
+        
         code = input("Ingrese el numero del codigo que desea revisar: ")
         if self.validate_ticket(code):
             print("Entrada Valida")
         else:
             print("Esta entrada no es valida")
-        
+    #Verifica si el ticket existe o si ya fue usado, de no ser asi lo verifica
     def validate_ticket(self, code):
         for ticket in self.Lista_Ticket:
             if str(ticket.id) == code and ticket.attendance == False:
@@ -352,7 +375,7 @@ class App():
             self.search_product_type()
         elif opcion == 2:
             self.search_product_range()
-
+    #Busca el producto por medio del nombre
     def search_product_name(self):
         product_search =input("Ingresa el nombre del producto que desea buscar: ").lower()
         find = False
@@ -363,7 +386,7 @@ class App():
         
         if not find:
             print("No se encontraron resultados")
-
+    #Busca el producto por medio del tipo
     def search_product_type(self):
         product_search =input("Ingresa el numero de la opcion que desee buscar: \n1. De Paquete \n2. De Plato \n3. Con Alcohol: \n4. Sin Alcohol: ")
         find = True
@@ -381,7 +404,7 @@ class App():
 
         if find:
             print("Dato invalido")
-
+    #Busca el producto por medio del rango
     def search_product_range(self):
         product_search_min =input("Ingresa el numero minimo del precio: ")
         while not product_search_min.isnumeric():
@@ -402,6 +425,7 @@ class App():
 
     #Gestión de venta de restaurantes
     def modulo_5(self):
+        #pide la cedula y verifica si existe luego se valida
         cedula = input("Ingresa tu cedula (sin puntos): ")
         while not cedula.replace(".", "").isnumeric() or 7 > len(cedula.replace(".", "")) > 8:
             cedula = input("Error, Ingresa la cedula: ")
@@ -412,9 +436,11 @@ class App():
         if data_client == False:
             print("Usted no es cliente")
         else:
+            #DE ser un cliente verifica si es vIP o no
             if data_client != 2:
                 print("Usted no es cliente VIP")
             else:
+                #busca en que estadios estas ubicado para darte los restaurantes de ese
                 stadium = data_client.tickets[-1].partido.stadium
                 restaurants = stadium.restaurants
 
@@ -426,6 +452,7 @@ class App():
                 while not opcion.isnumeric() or not int(opcion) in range(1, len(restaurants)+1):
                     opcion = input("Ingrese el numero del restaurante que desea escoger: ")
                 
+                #Consigue la lista de productos y te la muestra para ser seleccionada
                 restaurant = restaurants[int(opcion)-1]
                 products = restaurant.products
 
@@ -443,6 +470,7 @@ class App():
                 while not quantity.isnumeric():
                     quantity = input("Ingresa la cantidad de productos que desea comprar")
                 
+                #CAlculos factura
                 subtotal = product.price* int(quantity)
                 descuento = 0
                 if perfecto(data_client.dni):
@@ -450,6 +478,7 @@ class App():
                 IVA = subtotal*0.16
                 total = subtotal - descuento + IVA
 
+                #Resumen
                 print("-------Resumen-------")
                 print("---------------------------")
                 print(f"-Producto: {product.name}")
@@ -463,6 +492,7 @@ class App():
                 while not shopping.isnumeric() or not int(shopping) in range(1,3):
                     shopping = input("Desea realizar la compra? \n1. si\n2. no \n>")
                 
+                #Guarda los datos dnecesario para usarlo luego 
                 if shopping == "1":
                     print("compra exitosa")
                     data_client.balance += total
@@ -470,7 +500,8 @@ class App():
                     product.sold += quantity
                 else:
                     print("Gracias por visitar")
-
+    
+    #Te verifica si tu cedula es un numero perfecto
     def perfecto(self, numero):
         suma_divisores = 0
         for i in range(1, numero):
@@ -565,6 +596,8 @@ class App():
 
     #Guardar informacion en Archivo.txt
     def txt(self):
+        #Cada uno de estos With open, abre un archivo que esta en la carpeta txt (si no existe o crea) 
+        #y luego transofrma los objetos en diccionarios para guardarlos en los txt, hace esto con cada clase que existe
         with open('TXT/Client.txt', 'a') as a:
             for client in self.Lista_Client:
                 dicc = {'name': client.name,
