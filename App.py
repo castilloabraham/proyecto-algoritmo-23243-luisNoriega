@@ -60,6 +60,7 @@ class App():
                 self.modulo_6()
             else:
                 print("Hasta luego")
+                self.txt()
                 break
 
     #Carga del apis en los objetos
@@ -155,7 +156,7 @@ class App():
         match_search =input("Ingresa el stadium por el que desea buscar el partido: ").lower()
         find = False
         for match in self.Lista_Match:
-            if match_search in match.stadium.lower():
+            if match_search in match.stadium.name.lower():
                 find = True
                 print(match.show())
         
@@ -269,7 +270,7 @@ class App():
         
         subtotal = price
         descuento = 0
-        if vampiro(cedula):
+        if self.vampiro(cedula):
             descuento = subtotal*0.5
         IVA = subtotal*0.16
         total = subtotal - descuento + IVA
@@ -292,14 +293,14 @@ class App():
             print(f"Gracias por su compra, este el codig de tu entrada: {id_unico}")
             data_client.balance += total
             data_client.type_ticket = type_ticket
-            match.ticket_bought.append(seat)
+            #match.ticket_bought.append(seat)
             new_ticket = Ticket(id_unico, cedula, type_ticket, seat, match)
             self.Lista_Ticket.append(new_ticket)
 
         else:
             print("Hasta luego")
     
-    def vampiro(numero):
+    def vampiro(self, numero):
         digitos = list(str(numero))
         num_digitos = len(digitos)
 
@@ -326,15 +327,16 @@ class App():
     #Gestión de asistencia a partidos
     def modulo_3(self):
         code = input("Ingrese el numero del codigo que desea revisar: ")
-        if self.validate_ticket():
+        if self.validate_ticket(code):
             print("Entrada Valida")
         else:
             print("Esta entrada no es valida")
         
     def validate_ticket(self, code):
-        for ticket in self.Lista_Ticket():
-            if ticket.id.lower() == code.lower() or ticket.attendance != False:
-                match.attendance += 1
+        for ticket in self.Lista_Ticket:
+            if str(ticket.id) == code and ticket.attendance == False:
+                ticket.attendance = True
+                #match.attendance +=1
                 return True
         
         return False
@@ -355,7 +357,7 @@ class App():
         product_search =input("Ingresa el nombre del producto que desea buscar: ").lower()
         find = False
         for product in self.Lista_Product:
-            if product_search == product.name.lower():
+            if product_search in product.name.lower():
                 find = True
                 print(product.show())
         
@@ -363,16 +365,16 @@ class App():
             print("No se encontraron resultados")
 
     def search_product_type(self):
-        product_search =input("Ingresa el numero de la opcion que desee buscar: \n1. De Paquete \n2. De Plato \n3. Con Alcohol: \4. Sin Alcohol: ")
+        product_search =input("Ingresa el numero de la opcion que desee buscar: \n1. De Paquete \n2. De Plato \n3. Con Alcohol: \n4. Sin Alcohol: ")
         find = True
         for product in self.Lista_Product:
             if product_search == "1" and product.adicional == "package":
                 print(product.show())
-            elif product_search == "1" and product.adicional == "plate":
+            elif product_search == "2" and product.adicional == "plate":
                 print(product.show())
-            elif product_search == "1" and product.adicional == "alcoholic":
+            elif product_search == "3" and product.adicional == "alcoholic":
                 print(product.show())
-            elif product_search == "1" and product.adicional == "non-alcoholic":
+            elif product_search == "4" and product.adicional == "non-alcoholic":
                 print(product.show())
             elif not product_search in "1234":
                 find = False
@@ -391,7 +393,7 @@ class App():
         
         find = False
         for product in self.Lista_Product:
-            if float(product_search_min) < product.price < float(product_search_max):
+            if float(product_search_min) < float(product.price) < float(product_search_max):
                 find = True
                 print(product.show())
         
@@ -407,10 +409,10 @@ class App():
 
         data_client = self.validate_dni(cedula)
 
-        if data_cliente == False:
+        if data_client == False:
             print("Usted no es cliente")
         else:
-            if data_cliente != 2:
+            if data_client != 2:
                 print("Usted no es cliente VIP")
             else:
                 stadium = data_client.tickets[-1].partido.stadium
@@ -469,7 +471,7 @@ class App():
                 else:
                     print("Gracias por visitar")
 
-    def perfecto(numero):
+    def perfecto(self, numero):
         suma_divisores = 0
         for i in range(1, numero):
             if numero % i == 0:
@@ -487,11 +489,13 @@ class App():
             balance = 0
             aux = 0
             for client in self.Lista_Client:
-                if client.type_ticket = "2":
+                if client.type_ticket == "2":
                     balance += client.balance
                     aux += 1
-
-            print(f"El promedio de gasto de un cliente VIP es de: {balance/aux}$")
+            if balance == 0 and aux == 0:
+                print("No hay datos")
+            else:
+                print(f"El promedio de gasto de un cliente VIP es de: {balance/aux}$")
         elif opcion == 1:
             print("tabla con la asistencia a los partidos de mejor a peor")
             print("local, estadio, boletos vendidos, personas que asistieron, la relación asistencia/venta")
@@ -501,7 +505,7 @@ class App():
                 total = len(match.tickets_general)+len(match.tickets_vip)
                 relacion = total-match.attendance
                 matchs.append([match.home, match.away, total,match.attendance, relacion])
-            lista_ordenada = sorted(matchs, key=comparar_por_total, reverse=True)
+            lista_ordenada = sorted(matchs, key=self.comparar_por_total, reverse=True)
 
             for match in matchs:
                 print(match)
@@ -516,20 +520,39 @@ class App():
 
             partido_max.show()
 
-
         elif opcion == 3:
             print("el partido con mayor boletos vendidos")
             partido_max = self.Lista_Match[0]
             for match in range(1, len(self.Lista_Match)):
-                if partido_max.attendance < match.attendance:
+                boletos_max = len(partido_max.tickets_vip) + len(partido_max.tickets_general)
+                boletos = len(match.tickets_vip) + len(match.tickets_general)
+                
+                if boletos_max < boletos:
                     partido_max = match
 
             partido_max.show()
             
         elif opcion == 4:
             print("Top 3 productos más vendidos en el restaurante.")
+            productos_ordenados = sorted(self.Lista_Product, key=ordenar_por_vendidos, reverse=True)
+            tres_productos_con_mayor_vendidos = productos_ordenados[:3]
+
+            for producto in tres_productos_con_mayor_vendidos:
+                print(f"Producto: {producto.name} - vendidos: {producto.sold}")
+
+    
+
         elif opcion == 5:
             print("Top 3 de clientes (clientes que más compraron boletos)")
+            clientes_ordenados = sorted(self.Lista_Client, key=ordenar_por_entradas, reverse=True)
+            tres_clientes_con_mayor_entradas = clientes_ordenados[:3]
+
+            for cliente in tres_clientes_con_mayor_entradas:
+                print(f"Cliente: {cliente.name} - cantidad: {len(cliente.tickets)}")
+    
+    def ordenar_por_vendidos(cliente):
+        
+        return len(cliente.tickets)
 
     def comparar_por_total(lista1, lista2):
         if lista1[2] > lista2[2]:
@@ -542,4 +565,101 @@ class App():
 
     #Guardar informacion en Archivo.txt
     def txt(self):
-        pass
+        with open('TXT/Client.txt', 'a') as a:
+            for client in self.Lista_Client:
+                dicc = {'name': client.name,
+                        'age': client.age,
+                        'dni': client.dni,
+                        'balance': client.balance,
+                        'type_tickets': client.type_tickets,
+                        'tickets': client.tickets}
+
+                json_data = json.dumps(dicc)
+                # Write the string to the file with a newline character
+                a.write(json_data + '\n')
+        with open('TXT/Match.txt', 'a') as a:
+            for match in self.Lista_Match:
+                dicc = {
+                        'id': match.id,
+                        'number': match.number,
+                        'home': match.home.name,
+                        'away': match.away.name,
+                        'date': match.date,
+                        'group': match.group,
+                        'stadium': match.stadium.name,
+                        'tickets_vip': match.tickets_vip,
+                        'tickets_general': match.tickets_general,
+                        'attendance': match.attendance
+                        
+                        }
+
+                json_data = json.dumps(dicc)
+                a.write(json_data + '\n')
+
+        with open('TXT/Product.txt', 'a') as a:
+            for product in self.Lista_Product:
+                dicc = {
+                        'name': product.name,
+                        'quantity': product.quantity,
+                        'price': product.price,
+                        'adicional': product.adicional,
+                        'stock': product.stock,
+                        'sold': product.sold
+                }
+
+                json_data = json.dumps(dicc)
+                # Write the string to the file with a newline character
+                a.write(json_data + '\n')
+        with open('TXT/Restaurant.txt', 'a') as a:
+            for restaurant in self.Lista_Restaurant:
+                dicc = {
+                    'name': restaurant.name,
+                    'products': []
+                }
+
+                json_data = json.dumps(dicc)
+                # Write the string to the file with a newline character
+                a.write(json_data + '\n')
+        with open('TXT/Stadium.txt', 'a') as a:
+            for stadium in self.Lista_Stadium:
+                dicc = {
+                    'id': stadium.id,
+                    'name': stadium.name,
+                    'city': stadium.city,
+                    'capacity': stadium.capacity,
+                    'restaurants': []
+                }
+
+                json_data = json.dumps(dicc)
+                # Write the string to the file with a newline character
+                a.write(json_data + '\n')
+        with open('TXT/Team.txt', 'a') as a:
+            for team in self.Lista_Team:
+                dicc = {
+                    'id': team.id,
+                    'code': team.code,
+                    'name': team.name,
+                    'group': team.group,
+                }
+
+                json_data = json.dumps(dicc)
+                # Write the string to the file with a newline character
+                a.write(json_data + '\n')
+
+        with open('TXT/Ticket.txt', 'a') as a:
+            for ticket in self.Lista_Ticket:
+                dicc = {
+                    'id': ticket.id,
+                    'dni': ticket.dni,
+                    'tipo_boleto': ticket.tipo_boleto,
+                    'asiento': ticket.asiento,
+                    'partido': ticket.partido,
+                    'attendance': ticket.attendance
+                }
+
+                json_data = json.dumps(dicc)
+                # Write the string to the file with a newline character
+                a.write(json_data + '\n')
+
+
+

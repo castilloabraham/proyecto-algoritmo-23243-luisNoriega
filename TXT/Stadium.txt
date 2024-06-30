@@ -1,0 +1,20 @@
+{"id": "2eead114-7627-45c4-83ab-ee3d66a6c62f", "name": "Estadio Ol\u00edmpico de Berl\u00edn", "city": "Berl\u00edn", "capacity": [133, 319], "restaurants": []}
+{"id": "50542213-b8e8-400e-8353-4e3b3cfa8144", "name": "Allianz Arena", "city": "Munich", "capacity": [937, 411], "restaurants": []}
+{"id": "ba2b4f33-1d5e-4f63-ae0d-e491a48f41d4", "name": "Signal Iduna Park", "city": "Dortmund", "capacity": [19, 159], "restaurants": []}
+{"id": "53fa70dc-06c9-42a8-a4fd-9a02c0411704", "name": "MHPArena", "city": "Stuttgart", "capacity": [885, 418], "restaurants": []}
+{"id": "92940c44-15af-44a9-9fd4-480d0d865e27", "name": "Veltins-Arena", "city": "Gelsenkirchen", "capacity": [735, 253], "restaurants": []}
+{"id": "3181b7d7-77cc-42a8-96c9-ab6c18e282ae", "name": "Volksparkstadion", "city": "Hamburgo", "capacity": [53, 357], "restaurants": []}
+{"id": "85bf8f3a-4bb8-413e-8bf6-d577178b1eb7", "name": "Deutsche Bank Park", "city": "Fr\u00e1ncfort del Meno", "capacity": [222, 24], "restaurants": []}
+{"id": "3db1375b-a28f-4908-9878-ec0fe5a5587f", "name": "Estadio Rhein Energie", "city": "Colonia", "capacity": [374, 424], "restaurants": []}
+{"id": "2ae81544-c13f-442f-b332-6887628e9d6a", "name": "Red Bull Arena", "city": "Leipzig", "capacity": [292, 206], "restaurants": []}
+{"id": "2a3ea87b-3c46-4181-8409-56150ba3c962", "name": "Merkur Spiel-Arena", "city": "D\u00fcsseldorf", "capacity": [768, 169], "restaurants": []}
+{"id": "2eead114-7627-45c4-83ab-ee3d66a6c62f", "name": "Estadio Ol\u00edmpico de Berl\u00edn", "city": "Berl\u00edn", "capacity": [133, 319], "restaurants": []}
+{"id": "50542213-b8e8-400e-8353-4e3b3cfa8144", "name": "Allianz Arena", "city": "Munich", "capacity": [937, 411], "restaurants": []}
+{"id": "ba2b4f33-1d5e-4f63-ae0d-e491a48f41d4", "name": "Signal Iduna Park", "city": "Dortmund", "capacity": [19, 159], "restaurants": []}
+{"id": "53fa70dc-06c9-42a8-a4fd-9a02c0411704", "name": "MHPArena", "city": "Stuttgart", "capacity": [885, 418], "restaurants": []}
+{"id": "92940c44-15af-44a9-9fd4-480d0d865e27", "name": "Veltins-Arena", "city": "Gelsenkirchen", "capacity": [735, 253], "restaurants": []}
+{"id": "3181b7d7-77cc-42a8-96c9-ab6c18e282ae", "name": "Volksparkstadion", "city": "Hamburgo", "capacity": [53, 357], "restaurants": []}
+{"id": "85bf8f3a-4bb8-413e-8bf6-d577178b1eb7", "name": "Deutsche Bank Park", "city": "Fr\u00e1ncfort del Meno", "capacity": [222, 24], "restaurants": []}
+{"id": "3db1375b-a28f-4908-9878-ec0fe5a5587f", "name": "Estadio Rhein Energie", "city": "Colonia", "capacity": [374, 424], "restaurants": []}
+{"id": "2ae81544-c13f-442f-b332-6887628e9d6a", "name": "Red Bull Arena", "city": "Leipzig", "capacity": [292, 206], "restaurants": []}
+{"id": "2a3ea87b-3c46-4181-8409-56150ba3c962", "name": "Merkur Spiel-Arena", "city": "D\u00fcsseldorf", "capacity": [768, 169], "restaurants": []}

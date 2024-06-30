@@ -1,0 +1,1 @@
+{"name": "daniela", "age": 33, "dni": 1241214242, "balance": 87.0, "type_tickets": null, "tickets": []}
