@@ -1,6 +1,8 @@
 #importar paquetes
 import json
 import requests
+import uuid
+
 
 #Clases
 from Client import Client
@@ -38,7 +40,7 @@ class App():
     def run(self):
         self.API()
 
-        opciones = ["Gestión de partidos y estadios", "Gestión de venta de entradas", "Gestión de asistencia a partidos", "Gestión de restaurantes", "Gestión de venta de restaurantes", "Indicadores de gestión (estadísticas)"]
+        opciones = ["Gestión de partidos y estadios", "Gestión de venta de entradas", "Gestión de asistencia a partidos", "Gestión de restaurantes", "Gestión de venta de restaurantes", "Indicadores de gestión (estadísticas)", "salir"]
         print("Bienvenido")
         
         while True:
@@ -175,10 +177,20 @@ class App():
     #Gestión de venta de entradas
     def modulo_2(self):
         cedula = input("Ingresa tu cedula (sin puntos): ")
+        while not cedula.replace(".", "").isnumeric() or 7 > len(cedula.replace(".", "")) > 8:
+            cedula = input("Error, Ingresa la cedula: ")
+        cedula = int(cedula.replace(".", ""))
+
         data_client = self.validate_dni(cedula)
         if data_client == False:
             name = input("Ingresa tu nombre: ")
+            while not name.isalpha():
+                name = input("Error, Ingresa el nombre: ")
+
             age = input("Ingresa tu edad: ")
+            while not age.isnumeric() or int(age) < 1:
+                age = input("Error, Ingresa la edad: ")
+            age = int(age)
 
             data_client = Client(name, age, cedula)
             self.Lista_Client.append(data_client)
@@ -197,13 +209,13 @@ class App():
 
         match = self.Lista_Match[int(match_number)-1]
         match_capacity = match.stadium.capacity
-        precio = 0 
+        price = 0 
         if type_ticket == "1":
             match_capacity = match_capacity[0]
-            precio = 35
+            price = 35
         else:
             match_capacity = match_capacity[1]
-            precio = 75
+            price = 75
         
         row = match_capacity//10
 
@@ -221,6 +233,12 @@ class App():
             seat = " | ".join(seat)
             print(seat)
 
+        if type_ticket == "1":
+            ticket_bought = match.tickets_general
+        else:
+            ticket_bought = match.tickets_vip
+
+        
         print("formato del codigo fila-columna")
         seat_row = input("Ingresa la fila del asiento: ")
         while not seat_row.isnumeric() or not int(seat_row) in range(1, row+1):
@@ -231,12 +249,73 @@ class App():
         while not seat_column.isnumeric() or not int(seat_column) in range(1, 11):
             seat_column = input("Ingresa la columna del asiento: ")
         
+        seat = f"{seat_column}-{seat_column}"
+
+        while seat in ticket_bought:
+            print("Ticket ocupado ingrese otro")
+
+            print("formato del codigo fila-columna")
+            seat_row = input("Ingresa la fila del asiento: ")
+            while not seat_row.isnumeric() or not int(seat_row) in range(1, row+1):
+                seat_row = input("Ingresa la fila del asiento: ")
+
+            print("formato del codigo fila-columna")
+            seat_column = input("Ingresa la columna del asiento: ")
+            while not seat_column.isnumeric() or not int(seat_column) in range(1, 11):
+                seat_column = input("Ingresa la columna del asiento: ")
+            
+            seat = f"{seat_column}-{seat_column}"
+
+        
+        subtotal = price
+        descuento = 0
+        if vampiro(cedula):
+            descuento = subtotal*0.5
+        IVA = subtotal*0.16
+        total = subtotal - descuento + IVA
         
 
+        print("-------Resumen-------")
+        print("---------------------------")
+        print(f"-Asiento: {seat}")
+        print(f"-Subtotal: {subtotal}")
+        print(f"-descuento {descuento}")
+        print(f"-IVA: {IVA}")
+        print(f"-total: {total}")
 
+        shopping = input("Desea comprar la entrada? \n1. si\n2. no \n>")
+        while not shopping.isnumeric() or not int(shopping) in range(1,3):
+            shopping = input("Desea comprar la entrada? \n1. si\n2. no \n>")
         
+        if shopping == "1":
+            id_unico = uuid.uuid4()
+            print(f"Gracias por su compra, este el codig de tu entrada: {id_unico}")
+            data_client.balance += total
+            data_client.type_ticket = type_ticket
+            match.ticket_bought.append(seat)
+            new_ticket = Ticket(id_unico, cedula, type_ticket, seat, match)
+            self.Lista_Ticket.append(new_ticket)
 
+        else:
+            print("Hasta luego")
     
+    def vampiro(numero):
+        digitos = list(str(numero))
+        num_digitos = len(digitos)
+
+        # Comprobación de los factores
+        for i in range(1, int(numero**0.5)+1):
+            if numero % i == 0:
+                factor1 = str(i)
+                factor2 = str(numero // i)
+                factores = factor1 + factor2
+
+                # Comprobación de la permutación
+                if sorted(digitos) == sorted(factores) and len(factor1) == len(factor2):
+                    return True
+
+        return False
+
     def validate_dni(self, cedula):
         for client in self.Lista_Client:
             if int(client.dni) == int(cedula):
@@ -246,7 +325,19 @@ class App():
 
     #Gestión de asistencia a partidos
     def modulo_3(self):
-        pass
+        code = input("Ingrese el numero del codigo que desea revisar: ")
+        if self.validate_ticket():
+            print("Entrada Valida")
+        else:
+            print("Esta entrada no es valida")
+        
+    def validate_ticket(self, code):
+        for ticket in self.Lista_Ticket():
+            if ticket.id.lower() == code.lower() or ticket.attendance != False:
+                match.attendance += 1
+                return True
+        
+        return False
 
     #Gestión de restaurantes
     def modulo_4(self):
@@ -309,11 +400,145 @@ class App():
 
     #Gestión de venta de restaurantes
     def modulo_5(self):
-        pass
+        cedula = input("Ingresa tu cedula (sin puntos): ")
+        while not cedula.replace(".", "").isnumeric() or 7 > len(cedula.replace(".", "")) > 8:
+            cedula = input("Error, Ingresa la cedula: ")
+        cedula = int(cedula.replace(".", ""))
+
+        data_client = self.validate_dni(cedula)
+
+        if data_cliente == False:
+            print("Usted no es cliente")
+        else:
+            if data_cliente != 2:
+                print("Usted no es cliente VIP")
+            else:
+                stadium = data_client.tickets[-1].partido.stadium
+                restaurants = stadium.restaurants
+
+                for index, restaurant in enumerate(restaurants):
+                    print(f"        ----------{index+1}----------")
+                    print(restaurant.show())
+                
+                opcion = input("Ingrese el numero del restaurante que desea escoger: ")
+                while not opcion.isnumeric() or not int(opcion) in range(1, len(restaurants)+1):
+                    opcion = input("Ingrese el numero del restaurante que desea escoger: ")
+                
+                restaurant = restaurants[int(opcion)-1]
+                products = restaurant.products
+
+                for index, product in enumerate(products):
+                    print(f"        ----------{index+1}----------")
+                    print(product.show())
+                
+                opcion = input("Ingrese el numero del producto que desea comprar: ")
+                while (not opcion.isnumeric() or not int(opcion) in range(1, len(products)+1)) or (data_client.age < 18):
+                    opcion = input("Ingrese el numero del producto que desea comprar, recuerda que si eres menor no puede comprar alcohol: ")
+                
+                product = products[int(opcion)]
+
+                quantity = input("Ingresa la cantidad de productos que desea comprar")
+                while not quantity.isnumeric():
+                    quantity = input("Ingresa la cantidad de productos que desea comprar")
+                
+                subtotal = product.price* int(quantity)
+                descuento = 0
+                if perfecto(data_client.dni):
+                    descuento = subtotal*0.15
+                IVA = subtotal*0.16
+                total = subtotal - descuento + IVA
+
+                print("-------Resumen-------")
+                print("---------------------------")
+                print(f"-Producto: {product.name}")
+                print(f"-Cantidad: {quantitye}")
+                print(f"-Subtotal: {subtotal}")
+                print(f"-descuento {descuento}")
+                print(f"-IVA: {IVA}")
+                print(f"-total: {total}")
+
+                shopping = input("Desea realizar la compra? \n1. si\n2. no \n>")
+                while not shopping.isnumeric() or not int(shopping) in range(1,3):
+                    shopping = input("Desea realizar la compra? \n1. si\n2. no \n>")
+                
+                if shopping == "1":
+                    print("compra exitosa")
+                    data_client.balance += total
+                    product.quantity -= quantity
+                    product.sold += quantity
+                else:
+                    print("Gracias por visitar")
+
+    def perfecto(numero):
+        suma_divisores = 0
+        for i in range(1, numero):
+            if numero % i == 0:
+                suma_divisores += i
+        return suma_divisores == numero
 
     #Indicadores de gestión (estadísticas)
     def modulo_6(self):
-        pass
+        opciones = ["promedio de gasto de un cliente VIP en un partido", "tabla con la asistencia a los partidos de mejor a peor", "partido con mayor asistencia", "el partido con mayor boletos vendidos", "Top 3 productos más vendidos en el restaurante.", "Top 3 de clientes (clientes que más compraron boletos)"]
+        opcion = self.menu(opciones)
+
+        if opcion == 0:
+            print("promedio de gasto de un cliente VIP en un partido")
+
+            balance = 0
+            aux = 0
+            for client in self.Lista_Client:
+                if client.type_ticket = "2":
+                    balance += client.balance
+                    aux += 1
+
+            print(f"El promedio de gasto de un cliente VIP es de: {balance/aux}$")
+        elif opcion == 1:
+            print("tabla con la asistencia a los partidos de mejor a peor")
+            print("local, estadio, boletos vendidos, personas que asistieron, la relación asistencia/venta")
+            
+            matchs = []
+            for match in self.Lista_Match:
+                total = len(match.tickets_general)+len(match.tickets_vip)
+                relacion = total-match.attendance
+                matchs.append([match.home, match.away, total,match.attendance, relacion])
+            lista_ordenada = sorted(matchs, key=comparar_por_total, reverse=True)
+
+            for match in matchs:
+                print(match)
+
+        elif opcion == 2:
+            print("partido con mayor asistencia")
+
+            partido_max = self.Lista_Match[0]
+            for match in range(1, len(self.Lista_Match)):
+                if partido_max.attendance < match.attendance:
+                    partido_max = match
+
+            partido_max.show()
+
+
+        elif opcion == 3:
+            print("el partido con mayor boletos vendidos")
+            partido_max = self.Lista_Match[0]
+            for match in range(1, len(self.Lista_Match)):
+                if partido_max.attendance < match.attendance:
+                    partido_max = match
+
+            partido_max.show()
+            
+        elif opcion == 4:
+            print("Top 3 productos más vendidos en el restaurante.")
+        elif opcion == 5:
+            print("Top 3 de clientes (clientes que más compraron boletos)")
+
+    def comparar_por_total(lista1, lista2):
+        if lista1[2] > lista2[2]:
+            return 1
+        elif lista1[2] < lista2[2]:
+            return -1
+        else:
+            return 0        
+
 
     #Guardar informacion en Archivo.txt
     def txt(self):

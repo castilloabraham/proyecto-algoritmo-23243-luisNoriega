@@ -9,6 +9,7 @@ class Match():
         self.stadium = stadium
         self.tickets_vip = []
         self.tickets_general = []
+        self.attendance = 0
 
     def show(self):
         return f"""

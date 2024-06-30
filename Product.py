@@ -5,6 +5,7 @@ class Product():
         self.price = price
         self.adicional = adicional
         self.stock = stock
+        self.sold = 0
 
     def show(self):
         return f"""

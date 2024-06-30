@@ -5,6 +5,7 @@ class Ticket():
         self.tipo_boleto = tipo_boleto
         self.asiento = asiento
         self.partido = partido
+        self.attendance = False
 
     def show(self):
         return f"""
