@@ -99,6 +99,8 @@ class App():
                     new_product = Product(product['name'], product['quantity'], product['price'], product['adicional'], product['stock'])
                     products.append(new_product)
                     self.Lista_Product.append(new_product)
+
+                new_restaurant.products = (products)
                 #Guardamos lista de productos dentro del restaurantes
                 new_stadium.restaurants = restaurants
 
@@ -112,7 +114,7 @@ class App():
 
 
             self.Lista_Stadium.append(new_stadium )
-    #Carga del apis Stadiums en los objetos
+    #Carga del apis Matches en los objetos
     def API_Matches(self):
         #Accede al api y descarga la informacion con el requests y la transforma en un json con el .json()
         api_matches = requests.get("https://raw.githubusercontent.com/Algoritmos-y-Programacion/api-proyecto/main/matches.json").json()
@@ -312,13 +314,14 @@ class App():
             id_unico = uuid.uuid4()
             print(f"Gracias por su compra, este el codig de tu entrada: {id_unico}")
             data_client.balance += total
-            data_client.type_ticket = type_ticket
+            data_client.type_tickets = type_ticket
             if type_ticket == "1":
                 match.tickets_general.append(seat)
             else:
                 match.tickets_vip.append(seat)
             new_ticket = Ticket(id_unico, cedula, type_ticket, seat, match)
             self.Lista_Ticket.append(new_ticket)
+            data_client.tickets.append(new_ticket)
 
         else:
             print("Hasta luego")
@@ -440,7 +443,7 @@ class App():
             print("Usted no es cliente")
         else:
             #DE ser un cliente verifica si es vIP o no
-            if data_client != 2:
+            if data_client.type_tickets != "2":
                 print("Usted no es cliente VIP")
             else:
                 #busca en que estadios estas ubicado para darte los restaurantes de ese
@@ -461,10 +464,10 @@ class App():
 
                 for index, product in enumerate(products):
                     print(f"        ----------{index+1}----------")
-                    print(product.show())
+                    product.show()
                 
                 opcion = input("Ingrese el numero del producto que desea comprar: ")
-                while (not opcion.isnumeric() or not int(opcion) in range(1, len(products)+1)) or (data_client.age < 18):
+                while (not opcion.isnumeric() or not int(opcion) in range(1, len(products)+1)) or (data_client.age < 18 and products[len(products)-1].adicional == "alcoholic"):
                     opcion = input("Ingrese el numero del producto que desea comprar, recuerda que si eres menor no puede comprar alcohol: ")
                 
                 product = products[int(opcion)]
@@ -474,9 +477,9 @@ class App():
                     quantity = input("Ingresa la cantidad de productos que desea comprar")
                 
                 #CAlculos factura
-                subtotal = product.price* int(quantity)
+                subtotal = float(product.price)* float(quantity)
                 descuento = 0
-                if perfecto(data_client.dni):
+                if self.perfecto(data_client.dni):
                     descuento = subtotal*0.15
                 IVA = subtotal*0.16
                 total = subtotal - descuento + IVA
@@ -485,7 +488,7 @@ class App():
                 print("-------Resumen-------")
                 print("---------------------------")
                 print(f"-Producto: {product.name}")
-                print(f"-Cantidad: {quantitye}")
+                print(f"-Cantidad: {quantity}")
                 print(f"-Subtotal: {subtotal}")
                 print(f"-descuento {descuento}")
                 print(f"-IVA: {IVA}")
@@ -499,8 +502,8 @@ class App():
                 if shopping == "1":
                     print("compra exitosa")
                     data_client.balance += total
-                    product.quantity -= quantity
-                    product.sold += quantity
+                    #product.quantity -= quantity
+                    #product.sold += quantity
                 else:
                     print("Gracias por visitar")
     

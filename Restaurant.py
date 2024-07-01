@@ -7,4 +7,4 @@ class Restaurant():
     def show(self):
         return f"""
             name: {self.name}
-            products: {self.products}"""        
+            """        

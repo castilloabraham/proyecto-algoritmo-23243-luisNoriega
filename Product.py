@@ -8,10 +8,10 @@ class Product():
         self.sold = 0
 
     def show(self):
-        return f"""
+        print(f"""
             name = {self.name}
             quantity = {self.quantity}
             price = {self.price}
             adicional = {self.adicional}
             stock = {self.stock}
-            """
+            """)
