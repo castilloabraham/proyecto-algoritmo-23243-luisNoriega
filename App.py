@@ -313,7 +313,10 @@ class App():
             print(f"Gracias por su compra, este el codig de tu entrada: {id_unico}")
             data_client.balance += total
             data_client.type_ticket = type_ticket
-            match.ticket_bought.append(seat)
+            if type_ticket == "1":
+                match.tickets_general.append(seat)
+            else:
+                match.tickets_vip.append(seat)
             new_ticket = Ticket(id_unico, cedula, type_ticket, seat, match)
             self.Lista_Ticket.append(new_ticket)
 
@@ -586,6 +589,7 @@ class App():
         return len(cliente.tickets)
 
     def comparar_por_total(lista1, lista2):
+        print(lista1, lista2)
         if lista1[2] > lista2[2]:
             return 1
         elif lista1[2] < lista2[2]:
